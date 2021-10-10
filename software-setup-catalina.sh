@@ -31,8 +31,8 @@ function retry {
   until "$@"; do
     exit=$?
     wait=$((2 ** $count))
-    count=$(($count + 1))
-    if [ $count -lt $retries ]; then
+    cnt=$(($count + 1))
+    if [ "$count" -lt "$retries" ]; then
       echo "Retry $count/$retries exited $exit, retrying in $wait seconds..."
       sleep $wait
     else
@@ -44,7 +44,7 @@ function retry {
 }
 
 # Validating admin permission is required to run script
-read -p "This script must be run as an Admin. Continue? (y/n)? " CHOICE
+read -rp "This script must be run as an Admin. Continue? (y/n)? " CHOICE
 if [ "$CHOICE" = "y" ]
 then
     echo -e "${LP}Let's get this party started${NC}"
@@ -56,7 +56,7 @@ fi
 # Determines user location for NAS address
 # Used if you have multiple offices with separate NAS addresses
 # Replace letter with office name for clarity
-read -p "Which location are you in? (A/B/C) " LOCATION
+read -rp "Which location are you in? (A/B/C) " LOCATION
 if [ "$LOCATION" = "A" ]
 then
     echo -e "You've chosen ${LP}A${NC}"
@@ -75,7 +75,7 @@ fi
 # Intent here was to allow users to set secret files locally with their NAS credentials
 # Also defines username used for NAS connection
 # Replace numbers with usernames for authorized users in nas
-read -p "Enter your username for the NAS (specify format for username ex. mbentley) " USER
+read -rp "Enter your username for the NAS (specify format for username ex. mbentley) " USER
 if [ "$USER" = "1" ]
 then
     echo -e "You've chosen ${LP}1${NC}"
@@ -83,6 +83,8 @@ elif [ "$USER" = "2" ]
 then
 	echo -e "You've chosen ${LP}2${NC}"
 elif [ "$USER" = "3" ]
+then
+	echo -e "You've chosen ${LP}3${NC}"
 else
     echo -e "${LR}Invalid User, please restart${NC}"
     exit 1
@@ -120,9 +122,7 @@ killall Dock &&
 echo -e "${LP}Making Mount for NAS${NC}"
 
 cd ~/Desktop &&
-mkdir Mount &&
-
-if [ "$?" -eq "0" ]
+if mkdir Mount
 then
 	echo -e "${LG}SUCCESS${NC}"
 else
@@ -135,7 +135,7 @@ fi
 # This retries 3 times, in my experience with our specific NAS, this was the only command that worked but it was intermittent
 echo -e "${LP}Mounting to NAS, this may take a couple minutes.${NC}" 
 echo -e "${LR}When prompted, enter your NAS password.${NC}"
-retry 3 mount_smbfs //${USER}@${NAS} ~/Desktop/Mount &&
+retry 3 mount_smbfs //"${USER}"@"${NAS}" ~/Desktop/Mount &&
 if [ "$?" -eq "0" ]
 then
 	echo -e "${LG}SUCCESS:${NC} NAS Mount Successful"
@@ -149,8 +149,7 @@ echo -e "${LP}Copying software from NAS to /Desktop${NC}"
 
 ## If new versions are needed and the name is changed on the installer, change the file name to match in the path here
 # Copy Example DMG
-cp ~/Desktop/Mount/onboarding_software/Example.dmg ~/Desktop &&
-if [ "$?" -eq "0" ]
+if cp ~/Desktop/Mount/onboarding_software/Example.dmg ~/Desktop 
 then
 	echo -e "${LG}SUCCESS:${NC} Example.dmg Copied"
 else
@@ -161,8 +160,7 @@ fi
 # In our case, I created plist files for various settings and stored these in the NAS
 # This ensured we could have a fresh OS install but copy relevant settings 
 echo -e "${LP}Copying onboarding_library to /Desktop, this one takes a while${NC}"
-cp -r ~/Desktop/Mount/onboarding_library ~/Desktop &&
-if [ "$?" -eq "0" ]
+if cp -r ~/Desktop/Mount/onboarding_library ~/Desktop 
 then
 	echo -e "${LG}SUCCESS:${NC} onboarding_library Copied"
 else
@@ -172,8 +170,7 @@ fi
 # Copy scripts for new user
 # There were some additional scripts that would need to be run after a reboot, this was where those scripts were stored
 echo -e "${LP}Copying scripts to /Desktop, this one takes a while${NC}"
-cp -r ~/Desktop/Mount/scripts ~/Desktop &&
-if [ "$?" -eq "0" ]
+if cp -r ~/Desktop/Mount/scripts ~/Desktop 
 then
 	echo -e "${LG}SUCCESS:${NC} Scripts Copied"
 else
@@ -192,18 +189,16 @@ sudo ./example.sh
 # If the download path is no longer working, the download path can be changed to the new download path
 
 # Download Printer Drivers (10/22/19 release version 10.19.1 w/support for Catalina)
-curl -O http://downloads.canon.com/bicg2019/drivers/mac/UFRII_v10.19.1_Mac.zip &&
-if [ "$?" -eq "0" ]
+if curl -O http://downloads.canon.com/bicg2019/drivers/mac/UFRII_v10.19.1_Mac.zip 
 then
 	echo -e "${LG}SUCCESS:${NC} Printer Drivers Downloaded"
-	open UFRII_v10.19.1_Mac.zip && rm UFRII_v10.19.1_Mac.zip
+	open UFRII_v10.19.1_Mac.zip  rm UFRII_v10.19.1_Mac.zip
 else
 	echo -e "${LR}ERROR:${NC} Failed to Download Printer Drivers"
 fi
 
 # Download GPG Suite (change with version release, unable to find dynamic link)
-curl -O https://releases.gpgtools.org/GPG_Suite-2019.2.dmg &&
-if [ "$?" -eq "0" ]
+if curl -O https://releases.gpgtools.org/GPG_Suite-2019.2.dmg 
 then
 	echo -e "${LG}SUCCESS:${NC} GPG Suite Downloaded"
 else
@@ -211,8 +206,7 @@ else
 fi
 
 # Download current copy of google chrome
-curl -O https://dl.google.com/chrome/mac/stable/CHFA/googlechrome.dmg &&
-if [ "$?" -eq "0" ]
+if curl -O https://dl.google.com/chrome/mac/stable/CHFA/googlechrome.dmg 
 then
 	echo -e "${LG}SUCCESS:${NC} Google Chrome Downloaded"
 else
@@ -220,8 +214,7 @@ else
 fi
 
 # Download current copy of slack
-curl -O https://downloads.slack-edge.com/mac_releases/Slack-4.4.2-macOS.dmg &&
-if [ "$?" -eq "0" ]
+if curl -O https://downloads.slack-edge.com/mac_releases/Slack-4.4.2-macOS.dmg 
 then
 	echo -e "${LG}SUCCESS:${NC} Slack Downloaded"
 else
@@ -231,21 +224,20 @@ fi
 echo -e "${LP}Starting to install software${NC}"
 echo -e "${LR}DO NOT RESPOND YES UNTIL ALL IMAGES HAVE FINISHED OPENING${NC}"
 # Opening all .dmg files on the Desktop, depending on the machine, this could take a bit
-retry 3 open *.dmg &&
+retry 3 open ./*.dmg &&
 
 # Prompt to let the machine finish downloading all disk images
-read -p "Are you ready to install the applications? (y/n)? " INSTALL
+read -rp "Are you ready to install the applications? (y/n)? " INSTALL
 
 # Ensures admin is ready (all dmgs have opened)
 until [[ $INSTALL = "y" ]]; do
 	echo -e "${LR} It sounds like you aren't ready yet${NC}"
-	read -p "Are you ready to install the applications? (y/n)? " INSTALL
+	read -rp "Are you ready to install the applications? (y/n)? " INSTALL
 done
 
 # When updated, an app may change its installer info but not very likely, these may need updating in the future
 # Installing Chrome
-sudo cp -R "/Volumes/Google Chrome/Google Chrome.app" /Applications &&
-if [ "$?" -eq "0" ]
+if sudo cp -R "/Volumes/Google Chrome/Google Chrome.app" /Applications 
 then
 	echo -e "${LG}SUCCESS:${NC} Google Chrome Installed"
 	sudo hdiutil detach "/Volumes/Google Chrome" && rm -f ~/Desktop/googlechrome.dmg
@@ -254,8 +246,7 @@ else
 fi
 
 # Installing Slack
-sudo cp -R "/Volumes/Slack.app/Slack.app" /Applications &&
-if [ "$?" -eq "0" ]
+if sudo cp -R "/Volumes/Slack.app/Slack.app" /Applications 
 then
 	echo -e "${LG}SUCCESS:${NC} Slack Installed"
 	sudo hdiutil detach "/Volumes/Slack.app" && rm -f  ~/Desktop/Slack-4.4.2-macOS.dmg
@@ -264,8 +255,7 @@ else
 fi
 
 # Installing GPG
-sudo installer -package "/Volumes/GPG Suite/Install.pkg" -target "/Volumes/Macintosh HD" &&
-if [ "$?" -eq "0" ]
+if sudo installer -package "/Volumes/GPG Suite/Install.pkg" -target "/Volumes/Macintosh HD" 
 then
 	echo -e "${LG}SUCCESS:${NC} GPG Suite Installed"
 	sudo hdiutil detach "/Volumes/GPG Suite" && rm -f  ~/Desktop/GPG_Suite-2019.2.dmg
@@ -274,8 +264,7 @@ else
 fi
 
 # Installing Printer Drivers
-sudo installer -package "/Volumes/mac-UFRII-LIPSLX-v10191-02/UFRII_LT_LIPS_LX_Installer.pkg" -target "/Volumes/Macintosh HD" &&
-if [ "$?" -eq "0" ]
+if sudo installer -package "/Volumes/mac-UFRII-LIPSLX-v10191-02/UFRII_LT_LIPS_LX_Installer.pkg" -target "/Volumes/Macintosh HD" 
 then
 	echo -e "${LG}SUCCESS:${NC} Printer Drivers Installed"
 	sudo hdiutil detach "/Volumes/mac-UFRII-LIPSLX-v10191-02" && rm -f  ~/Desktop/UFRII_v10.19.1_Mac.dmg
@@ -287,7 +276,7 @@ fi
 # We had a separate script for creating a new user
 # This allowed us to prep machines with this script, then days/weeks later, run the new user script manually
 # Or, if we were ready, prep the machine and create the new user in one go
-read -p "Would you like to create a new user right now? (y/n)? " CHOICE
+read -rp "Would you like to create a new user right now? (y/n)? " CHOICE
 if [ "$CHOICE" = "y" ]
 then
     echo -e "${LP}Starting script for new user${NC}"

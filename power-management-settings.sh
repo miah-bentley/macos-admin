@@ -23,7 +23,7 @@ LC='\033[1;36m' #Light Cyan
 
 # Success and Error messages are echoed based on the return code on the command used.
 
-read -p "This script must be run as an Admin. Continue (y/n)? " CHOICE
+read -rp "This script must be run as an Admin. Continue (y/n)? " CHOICE
 if [ "$CHOICE" = "y" ]
 then
 	echo -e "${LP}YAAAAS! Let's do this!${NC}";
@@ -32,66 +32,59 @@ else
 	exit 0
 fi
 	
-sudo pmset -a DestroyFVKeyOnStandby 1; 
 #When a Mac using FileVault encryption is placed into standby mode, 
 #a FileVault key is stored in EFI so that it can quickly come out of standby mode when woken from deep sleep. 
 #This is set to 1 so OS X will automatically destroy the FileVault key when it’s placed in power-saving standby mode, 
 #preventing the stored key from being a potential weak point or attack target. 
-if [ "$?" -eq "0" ]
+if sudo pmset -a DestroyFVKeyOnStandby 1; 
 then
 	echo -e "${LG}SUCCESS:${NC} DestroyFVKeyOnStandby set to 1"
 else
 	echo -e "${LR}ERROR:${NC} Setting DestroyFVKeyOnStandby failed"
 fi
 
-sudo pmset -a standbydelaylow 108000;
 #specifies the delay, in seconds, before writing the hibernation image to disk and powering off memory for standby; 
 #(Use an argument of 0 to set the idle time to never)
 #Setting Value to 30 hours, machine can be expected to shutdown over the weekend but not overnight.
 #*Note: In Mac OSX Mojave, you have standbydelayhigh and standbydelaylow. 
 #These allow you to vary your standby time based on battery percentage. 
 #High will be used when your battery is over 50% and Low will be used when the batter is under 50%.
-if [ "$?" -eq "0" ]
+if sudo pmset -a standbydelaylow 108000;
 then
 	echo -e "${LG}SUCCESS:${NC} standbydelaylow set to 108000"
 else
 	echo -e "${LR}ERROR:${NC} Setting standbydelaylow failed"
 fi
 
-sudo pmset -a standbydelayhigh 108000;
-
-if [ "$?" -eq "0" ]
+if sudo pmset -a standbydelayhigh 108000;
 then
 	echo -e "${LG}SUCCESS:${NC} standbydelayhigh set to 108000"
 else
 	echo -e "${LR}ERROR:${NC} Setting standbydelayhigh failed"
 fi
 
-sudo pmset -a disksleep 120;
 #The time in minutes before hard disks are spun down and put to sleep; 
 #(Use an argument of 0 to set the idle time to never)
-if [ "$?" -eq "0" ]
+if sudo pmset -a disksleep 120;
 then
 	echo -e "${LG}SUCCESS:${NC} disksleep set to 120"
 else
 	echo -e "${LR}ERROR:${NC} Setting disksleep failed"
 fi
 
-sudo pmset -a sleep 90;
 #is the time in minutes to system sleep; 
 #(Use an argument of 0 to set the idle time to never)
 
-if [ "$?" -eq "0" ]
+if sudo pmset -a sleep 90;
 then
 	echo -e "${LG}SUCCESS:${NC} sleep set to 90"
 else
 	echo -e "${LR}ERROR:${NC} Setting sleep failed"
 fi
 
-sudo pmset -a displaysleep 10;
 # is the time in minutes before the display is put to sleep; 
 #0 indicates that the display is never put to sleep
-if [ "$?" -eq "0" ]
+if sudo pmset -a displaysleep 10;
 then
 	echo -e "${LG}SUCCESS:${NC} displaysleep set to 10"
 else
