@@ -4,7 +4,7 @@
 
 # Description    :  This script designed for IT Admins without MDM, this was last tested on macOS Catalina
 #                   Downloads and installs base user apps
-# 					Copies needed files for the New User script as well, example provided for using a local NAS
+# 		    Copies needed files for the New User script as well, example provided for using a local NAS
 #                   Success and Error messages are echoed based on the return code on the command used.
 
 # Author         :  Miah Bentley
